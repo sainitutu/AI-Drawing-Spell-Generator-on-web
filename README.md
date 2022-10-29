@@ -3,6 +3,9 @@
 
 可自定議tag文件(在json裡面)
 
+# 功能展示
+https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/
+
 # 使用方式
 * 下載後打開index.html即可使用(或拿去架站也行)
 * 使用前請先載入json(已包含在壓縮檔裡面，已放入不少本人收集的TAG)
