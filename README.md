@@ -13,6 +13,10 @@ https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/
 * 可用下拉找尋或關鍵字模糊查找TAG
 * 模糊查找輸入中文或英文都能找
 
+# 功能更新
+## 1.0.2
+* 開始時預先讀取預設的json
+
 # JSON格式
 [
 	{
