@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>AI-Drawing-Spell-Generator-web</h1>
-請先載入資料包<br><input type="file" id="fileInput" accept=".json">
+如果要使用自己的資料，請載入資料包<br><input type="file" id="fileInput" accept=".json">
 <hr>
 <h3>輸入要找的字詞</h3>
 <input type="text" id="input_show" list="options" size="30">
@@ -44,6 +44,20 @@
 			})
 		});
 	}
+	function httpGet(theUrl)
+	{
+		var xmlHttp = new XMLHttpRequest();
+		xmlHttp.open("GET",theUrl,false);
+		xmlHttp.send(null);
+		return xmlHttp.responseText;
+	}
+    window.onload = function () {
+		var preset_json_url="https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/WEB/data.json";
+		//console.log(httpGet(preset_json_url));
+		json_data=JSON.parse(httpGet(preset_json_url));
+		json_data_in_list();
+		alert('預設檔案載入成功！！\n共載入'+(index_data_n)+'個tag');
+    }
 	$('.uquote').on('click',function(){
 		var result=$('.result').val();
 		result=result.replace(/\{/g,"(")
