@@ -24,13 +24,42 @@
 <h3>成果</h3>
 <button class='clear'>clear</button>
 <button class='copy'>copy</button>
-<button class='uquote'>{ }to( )</button>
-<button class='quote'>( )to{ }</button>
+<input type="radio" id="quote" value="quote" checked name='c_quote'>
+<label for="quote">use {---}</label>
+<input type="radio" id="uquote" value="uquote" name='c_quote'>
+<label for="uquote">use (---)</label>
 <br><br>
 <textarea rows="5" cols="60" class='result' style='resize:none;width:80%'></textarea>
 <script>
 	var json_data;
+	var output_data=[];
 	var index_data_n=0;
+	function turn_uquote()
+	{
+		var result=$('.result').val();
+		result=result.replace(/\{/g,"(")
+		result=result.replace(/\}/g,")")
+		$('.result').val(result);
+	}
+	function turn_quote()
+	{
+		var result=$('.result').val();
+		result=result.replace(/\(/g,"{")
+		result=result.replace(/\)/g,"}")
+		$('.result').val(result);
+	}
+	function check_output_data()
+	{
+		var tag=$('.tag').val();
+		for(var i=0;i<output_data.length;i++)
+		{
+			if(tag==output_data[i][0])
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
 	function json_data_in_list()
 	{	//載入json程式
 		//先清空
@@ -59,21 +88,14 @@
 		alert('預設檔案載入成功！！\n共載入'+(index_data_n)+'個tag');
     }
 	$('.uquote').on('click',function(){
-		var result=$('.result').val();
-		result=result.replace(/\{/g,"(")
-		result=result.replace(/\}/g,")")
-		//console.log(result);
-		$('.result').val(result);
+
 	});
 	$('.quote').on('click',function(){
-		var result=$('.result').val();
-		result=result.replace(/\(/g,"{")
-		result=result.replace(/\)/g,"}")
-		//console.log(result);
-		$('.result').val(result);
+
 	});
 	$('.clear').on('click',function(){
 		$('.result').val('');
+		output_data=[];
 	});
 	$('.copy').on('click',function(){
 		var content = $('.result');
@@ -92,25 +114,44 @@
 	$('.add_word').on('click',function(){
 		//文字加到result
 		var result = $('.result').val();
-		if(result=='')
+		
+		//console.log(check_output_data());
+		var out_index=check_output_data();
+		if(out_index==-1)
 		{
-			//result為空
-			$('.result').val($('.tag').val());
+			output_data.push([$('.tag').val(),0]);
 		}
 		else
 		{
-			//result不為空
-			var rule=$('.tag').val();
-			if(result.search(rule)==-1)
+			output_data[out_index][1]=output_data[out_index][1]+1;
+		}
+		var output_text="";
+		output_data.forEach(function(output_d){
+			var t_txt=output_d[0];
+			if(output_d[1]>0)
 			{
-				$('.result').val(result+","+$('.tag').val());
+				for(var i=0;i<output_d[1];i++)
+				{
+					t_txt="("+t_txt+")";
+				}
+			}
+			if(output_text=="")
+			{
+				output_text=t_txt;
 			}
 			else
 			{
-				result=result.replace($('.tag').val(), "("+$('.tag').val()+")");
-				$('.result').val(result);
-				//alert("重復");
+				output_text=output_text+","+t_txt;
 			}
+		})
+		$('.result').val(output_text);
+		if($('#uquote').prop('checked'))
+		{
+			turn_uquote()
+		}
+		else
+		{
+			turn_quote()
 		}
 	});
 	$('#fileInput').change(function(){
@@ -136,6 +177,18 @@
 	  };
 	  reader.readAsText(this.files[0]);
 	});
+	
+	$('#quote').on('click',function(){
+		if($('#quote').prop('checked')){
+			turn_quote()
+		}
+	});
+	$('#uquote').on('click',function(){
+		if($('#uquote').prop('checked')){
+			turn_uquote()
+		}
+	});
+	
 </script>
 </body>
 </html>
