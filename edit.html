@@ -1,0 +1,541 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+        <title>AI-Drawing-Spell-Generator-web edit json</title>
+    </head>
+    <body>
+        <h1>AI-Drawing-Spell-Generator-web edit json</h1>
+        如果要使用自己的資料，請載入資料包<br>
+        <input type="file" id="fileInput" accept=".json"><br>
+        此為修改json的工具網頁
+        <hr>
+        <p>修改目標項目</p>
+        <input type="radio" id="kind" value="kind" checked name='kind_tag'>
+        <label for="kind">類別(kind)</label>
+        <input type="radio" id="type" value="tag" name='kind_tag'>
+        <label for="type">標籤(tag)</label>
+        <p>操作</p>
+        <input type="radio" id="add" value="add" checked name='action_type'>
+        <label for="add">新增</label>
+        <input type="radio" id="delete" value="delete" name='action_type'>
+        <label for="delete">刪除</label>
+        <input type="radio" id="revise" value="revise" name='action_type'>
+        <label for="revise">修改</label>
+        <hr>
+        <div id='work_area'>
+            <div id='kind-add-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>以下是目前所有類別</p>
+                <input type="text" list="kind-add-options" size="30" class="kind">
+                <datalist id="kind-add-options" class="options">
+                </datalist>
+                <p>請輸入要新增的類別名</p>
+                <input type="text" id='kind_add_name'>
+                <button id='add_to_kind'>新增類別</button>
+            </div>
+            <div id='kind-delete-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>以下是目前所有類別</p>
+                <input type='text' list='kind-delete-options' size='30' class="kind">
+                <datalist id='kind-delete-options' class="options">
+                </datalist>
+                <p>請選擇要刪除的類別名</p>
+                <button id='delete_to_kind'>刪除類別</button>
+            </div>
+            <div id='kind-revise-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>以下是目前所有類別</p>
+                <p>請先選擇要修改的類別</p>
+                <input type='text' list='kind-revise-options' size='30' class="kind">
+                <datalist id='kind-revise-options' class="options">
+                </datalist>
+                <p>請輸入要修改的新類別名</p>
+                <input type="text" id='kind_revise_name'>
+                <button id='revise-to-kind'>修改類別</button>
+            </div>
+            <div id='tag-add-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>請先選擇類別</p>
+                <input type='text' list='type-add-options' size='30' class="kind">
+                <datalist id='type-add-options' class="options">
+                </datalist>
+                <p class='tag_num'></p>
+                <p>請輸入要要新增的tag名稱</p>
+                <input type="text" id='tag-add-name'>
+                <p>請輸入要要新增的tag</p>
+                <input type="text" id='tag-add-value'>
+                <button id='add-to-tag'>新增tag</button>
+            </div>
+            <div id='tag-delete-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>請先選擇類別</p>
+                <input type='text' list='tag-delete-options' size='30' class="kind">
+                <datalist id='tag-delete-options' class="options">
+                </datalist>
+                <p class='tag_num'></p>
+                <p>再選擇tag</p>
+                <input type='text' list='tag-delete-options2' size='30' class="tag">
+                <datalist id='tag-delete-options2' class="options2">
+                </datalist>
+                <button id='delete-to-tag'>刪除tag</button>
+            </div>
+            <div id='tag-revise-area' style="display: none;">
+                <p class='kind_num'></p>
+                <p>請先選擇類別</p>
+                <input type='text' list='tag-revise-options' size='30' class="kind">
+                <datalist id='tag-revise-options' class="options">
+                </datalist>
+                <p class='tag_num'></p>
+                <p>再選擇tag</p>
+                <input type='text' list='tag-revise-options2' size='30' class="tag">
+                <datalist id='tag-revise-options2' class="options2">
+                </datalist>
+                <p>接下來修改tag資料</p>
+                <p>tag名稱</p>
+                <input type="text" id='tag-revise-name'>
+                <p>tag資料</p>
+                <input type="text" id='tag-revise-value'>
+                <button id='revise-to-tag'>修改tag</button>
+            </div>
+        </div>
+        
+        <hr>
+        <button id='download_json'>下載成果JSON</button>
+        <script>
+            var json_data;
+            var index_data_n=0;
+            window.onload = function () {
+                var preset_json_url="https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/data_tw.json";
+                json_data=JSON.parse(httpGet(preset_json_url));
+                alert('預設檔案載入成功！！');
+                check_type_action();
+            }
+            function download(filename, text) {
+              var element = document.createElement('a');
+              element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+              element.setAttribute('download', filename);
+
+              element.style.display = 'none';
+              document.body.appendChild(element);
+
+              element.click();
+
+              document.body.removeChild(element);
+            }
+            $('#fileInput').change(function(){
+                //讀取json
+              if (this.files.length === 0) {
+                //console.log('請選擇文件！');
+                alert("請選擇json文件");
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = function fileReadCompleted() {
+                try
+                {
+                    json_data=JSON.parse(reader.result);
+                    check_type_action()
+                    alert('json載入成功！！');
+                }
+                catch(e)
+                {
+                    alert("解析json失敗，請確認是否為json檔");
+                }
+
+              };
+              reader.readAsText(this.files[0]);
+            });
+            function httpGet(theUrl)
+            {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("GET",theUrl,false);
+                xmlHttp.send(null);
+                return xmlHttp.responseText;
+            }
+            function open_kind_add()
+            {
+                $("#kind-add-area").show();
+                $("#kind-add-area #kind_add_name").val('');
+                $("#kind-add-area .kind").val('');
+                i=0;
+                $("#kind-add-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#kind-add-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#kind-add-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function open_kind_delete(){
+                $("#kind-delete-area").show();
+                $("#kind-delete-area .kind").val('');
+                i=0;
+                $("#kind-delete-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#kind-delete-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#kind-delete-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function open_kind_revise()
+            {
+                $("#kind-revise-area").show();
+                $("#kind-revise-area .kind").val('');
+                
+                $("#kind-revise-area #kind_revise_name").val('');
+                i=0;
+                $("#kind-revise-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#kind-revise-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#kind-revise-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function open_tag_add()
+            {
+                $("#tag-add-area").show();
+                $("#tag-add-area .kind").val('');
+                $("#tag-add-area #tag-add-name").val('');
+                $("#tag-add-area #tag-add-vaalue").val('');
+                i=0;
+                $("#tag-add-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#tag-add-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#tag-add-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function open_tag_delete()
+            {
+                $("#tag-delete-area").show();
+                $("#tag-delete-area .kind").val('');
+                $("#tag-delete-area .tag").val('');
+                $("#tag-delete-area .tag_num").empty();
+                i=0;
+                $("#tag-delete-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#tag-delete-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#tag-delete-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function open_tag_revise(){
+                $("#tag-revise-area").show();
+                $("#tag-revise-area .kind").val('');
+                $("#tag-revise-area .tag").val('');
+                $("#tag-revise-area #tag-revise-name").val('');
+                $("#tag-revise-area #tag-revise-value").val('');
+                i=0;
+                $("#tag-revise-area .options").empty();
+                json_data.forEach(function(c){
+                    //c['Category_Name'];
+                    $("#tag-revise-area .options").append("<option value='"+c['Category_Name']+"-"+i+"' data-value='"+i+"'></option>");
+                    i++;
+                });
+                $("#tag-revise-area .kind_num").empty().append('目前載入的類別'+i+"個");
+            }
+            function check_type_action(){
+                //判斷操作項目與動作
+                var key_word='';
+                if($('#kind').prop('checked'))
+                {
+                    key_word='kind';
+                }
+                else if($('#type').prop('checked'))
+                {
+                    key_word='tag';
+                }
+                //
+                if($('#add').prop('checked'))
+                {
+                    key_word=key_word+"-add"
+                }
+                else if($('#delete').prop('checked'))
+                {
+                    key_word=key_word+"-delete"
+                }
+                else if($('#revise').prop('checked'))
+                {
+                    key_word=key_word+"-revise"
+                }
+                
+                //alert(key_word);
+                //$('#work_area').empty()
+                $("#kind-add-area").hide();
+                $("#kind-delete-area").hide();
+                $("#kind-revise-area").hide();
+                $("#tag-add-area").hide();
+                $("#tag-delete-area").hide();
+                $("#tag-revise-area").hide();
+                
+                var i=0;
+                switch (key_word) {
+                    case 'kind-add':
+                        open_kind_add();
+                        break;
+                    case 'kind-delete':
+                        open_kind_delete()
+                        break;
+                    case 'kind-revise':
+                        open_kind_revise();
+                        break;
+                    case 'tag-add':
+                        open_tag_add()
+                        break;
+                    case 'tag-delete':
+                        open_tag_delete()
+                        break;
+                    case 'tag-revise':
+                        open_tag_revise()
+                        break;
+                }
+            }
+        //物件點擊與改變時操作
+        $("[name='kind_tag']").on('click',function(){
+           check_type_action()
+        });
+        $("[name='action_type']").on('click',function(){
+           check_type_action()
+        });
+        $("#tag-delete-area .kind").change(function(){
+            var val = $(this).val()
+            var tag_id=$("#tag-delete-area .options option").filter(function(){
+                return this.value == val;
+            }).data('value');
+            //alert(tag_id);
+            $("#tag-delete-area .tag").val('');
+            var i=0
+            $("#tag-delete-area .options2").empty();
+            json_data[tag_id]['data'].forEach(function(c){
+                $("#tag-delete-area .options2").append("<option value='"+c[0]+"-"+i+"' data-value='"+c[1]+"' >"+c[1]+"</option>");
+                i++;
+            });
+            $("#tag-delete-area .tag_num").empty().append('目前載入的tag有'+i+"個");
+        })
+        $("#tag-revise-area .kind").change(function(){
+            var val = $(this).val()
+            var kind_id=$("#tag-revise-area .options option").filter(function(){
+                return this.value == val;
+            }).data('value');
+            //alert(tag_id);
+            $("#tag-revise-area .tag").val('');
+            var i=0
+            $("#tag-revise-area .options2").empty();
+            json_data[kind_id]['data'].forEach(function(c){
+                $("#tag-revise-area .options2").append("<option value='"+c[0]+"-"+i+"' data-value='"+i+"' >"+c[1]+"</option>");
+                i++;
+            });
+            $("#tag-revise-area .tag_num").empty().append('目前載入的tag有'+i+"個");
+        })
+        $("#tag-revise-area .tag").change(function(){
+            var kind_val=$("#tag-revise-area .kind").val();
+            var tag_val=$(this).val();
+            var kind_id=$("#tag-revise-area .options option").filter(function(){
+                return this.value == kind_val;
+            }).data('value');
+            var tag_id=$("#tag-revise-area .options2 option").filter(function(){
+                return this.value == tag_val;
+            }).data('value');
+            //alert(kind_id+"-"+tag_id);
+            $("#tag-revise-area #tag-revise-name").val(json_data[kind_id]['data'][tag_id][0]);
+            $("#tag-revise-area #tag-revise-value").val(json_data[kind_id]['data'][tag_id][1]);
+        })
+        //按鍵功能
+        $("#add_to_kind").on('click',function(){
+            //新增類別
+            if($("#kind_add_name").val()=='')
+            {
+                alert('沒有輸入要新增的類別名')
+                return
+            }
+            if(confirm('是否確認新增類別？'))
+            {
+                console.log('新增類別');
+                var add_json='{"Category_Name":"'+$("#kind_add_name").val()+'","data":[["tag名稱","tag"]]}';
+                json_data.push(JSON.parse(add_json))
+                open_kind_add()
+                alert('新增類別成功！')
+            }
+            else
+            {
+                console.log('不新增類別');
+            }
+        });
+        $("#delete_to_kind").on('click',function(){
+            //刪除類別
+            if($("#kind-delete-area .kind").val()=='')
+            {
+                alert("請先選擇要刪除的類別");
+                return
+            }
+            else
+            {
+                if(confirm("是否刪除選擇中的類別？\n類別下的tag會一併刪除"))
+                {
+                    console.log('刪除類別');
+                    var kind_val=$("#kind-delete-area .kind").val();
+                    var kind_id=$("#kind-delete-area .options option").filter(function(){
+                        return this.value == kind_val;
+                    }).data('value');
+                    //console.log(kind_id)
+                    json_data.splice(kind_id,1)
+                    open_kind_delete()
+                    alert('刪除類別成功！')
+                }
+                else
+                {
+                    console.log('不刪除類別');
+                }
+            }
+        });
+        $("#revise-to-kind").on('click',function(){
+            //修改類別
+            if($("#kind-revise-area .kind").val()=='' || $("#kind_revise_name").val()=='')
+            {
+                alert('不允許空白類別名或無選擇類別');
+            }
+            else
+            {
+                if(confirm("是否確定修改類別名？"))
+                {
+                    console.log('修改類別');
+                    var kind_val=$("#kind-revise-area .kind").val();
+                    var kind_id=$("#kind-revise-area .options option").filter(function(){
+                        return this.value == kind_val;
+                    }).data('value');
+                    json_data[kind_id]['Category_Name']=$('#kind_revise_name').val();
+                    open_kind_revise();
+                    alert('修改類別名成功！')
+                }
+                else
+                {
+                    console.log('不修改類別');
+                }
+            }
+            
+        });
+        $("#download_json").on('click',function(){
+            download('data.json', JSON.stringify(json_data));
+        });
+        $("#add-to-tag").on('click',function(){
+            //新增tag
+            if($("#tag-add-area .kind").val()=='')
+            {
+                alert('請先選類別');
+                return
+            }
+            if($('#tag-add-name').val()=='')
+            {
+                alert('請輸入tag名稱');
+                return
+            }
+            if($("#tag-add-value").val()=='')
+            {
+                alert('請輸入tag');
+                return
+            }
+            if(confirm("是否新增tag？"))
+            {
+                console.log("新增tag")
+                var kind_val=$("#tag-add-area .kind").val();
+                var kind_id=$("#tag-add-area .options option").filter(function(){
+                    return this.value == kind_val;
+                }).data('value');
+                var add_json='["'+$('#tag-add-name').val()+'","'+$("#tag-add-value").val()+'"]'
+                json_data[kind_id]['data'].push(JSON.parse(add_json))
+                open_tag_add()
+                alert('新增tag成功！')
+            }
+            else
+            {
+                console.log("不新增tag")
+            }
+        })
+        $("#delete-to-tag").on('click',function(){
+            //刪除tag
+            if($("#tag-delete-area .kind").val()=='')
+            {
+                alert('請選類別');
+                return
+            }
+            if($("#tag-delete-area .tag").val()=='')
+            {
+                alert('請選tag');
+                return
+            }
+            if(confirm("是否刪除所擇的tag？"))
+            {
+                console.log("刪除tag")
+                var kind_val=$("#tag-delete-area .kind").val();
+                var kind_id=$("#tag-delete-area .options option").filter(function(){
+                    return this.value == kind_val;
+                }).data('value');
+                var tag_val=$("#tag-delete-area .tag").val();
+                var tag_id=$("#tag-delete-area .options2 option").filter(function(){
+                    return this.value == tag_val;
+                }).data('value');
+                json_data[kind_id]['data'].splice(tag_id,1)
+                open_tag_delete()
+                alert('刪除tag成功！')
+            }
+            else
+            {
+                console.log("不刪除tag")
+            }
+        })
+        $("#revise-to-tag").on('click',function(){
+            //修改tag
+            if($("#tag-revise-area .kind").val()=='')
+            {
+                alert('請選類別');
+                return
+            }
+            if($("#tag-revise-area .tag").val()=='')
+            {
+                alert('請選tag');
+                return
+            }
+            if($("#tag-revise-name").val()=='')
+            {
+                alert('tag名稱不能空白');
+                return
+            }
+            if($("#tag-revise-value").val()=='')
+            {
+                alert('tag資料不能空白');
+                return
+            }
+            if(confirm("確定修改tag嗎？"))
+            {
+                console.log("修改tag")
+                var kind_val=$("#tag-revise-area .kind").val();
+                var kind_id=$("#tag-revise-area .options option").filter(function(){
+                    return this.value == kind_val;
+                }).data('value');
+                var tag_val=$("#tag-revise-area .tag").val();
+                var tag_id=$("#tag-revise-area .options2 option").filter(function(){
+                    return this.value == tag_val;
+                }).data('value');
+                var new_name=$("#tag-revise-name").val();
+                var new_tag=$("#tag-revise-value").val();
+                json_data[kind_id]['data'][tag_id][0]=new_name;
+                json_data[kind_id]['data'][tag_id][1]=new_tag;
+                open_tag_revise()
+                alert('修改tag成功');
+            }
+            else
+            {
+                console.log("不修改tag")
+            }
+        })
+        </script>
+    </body>
+</html>

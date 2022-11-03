@@ -9,6 +9,7 @@
 </head>
 <body>
 <h1>AI-Drawing-Spell-Generator-web</h1>
+<a href="edit.html" target="_blank">產生自己的資料包</a><br>
 如果要使用自己的資料，請載入資料包<br><input type="file" id="fileInput" accept=".json">
 <hr>
 <h3>輸入要找的字詞</h3>
@@ -81,7 +82,7 @@
 		return xmlHttp.responseText;
 	}
     window.onload = function () {
-		var preset_json_url="https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/WEB/data.json";
+		var preset_json_url="https://sainitutu.github.io/AI-Drawing-Spell-Generator-on-web/data_tw.json";
 		//console.log(httpGet(preset_json_url));
 		json_data=JSON.parse(httpGet(preset_json_url));
 		json_data_in_list();
